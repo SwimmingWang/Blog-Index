@@ -1,9 +1,24 @@
 ---
 import "../styles/global.css";
 
-const links = [
-  { label: "GitHub", href: "https://github.com/" },
-  { label: "Email", href: "mailto:hello@example.com" }
+const navItems = ["Blog", "Projects", "Gallery", "About"];
+
+const posts = [
+  { date: "Jul 01, 2026", title: "重新搭建个人网站：从零开始的 Astro 首页" },
+  { date: "Jun 18, 2026", title: "一些关于长期写笔记的想法" },
+  { date: "May 26, 2026", title: "前端项目里的简单设计系统" },
+  { date: "Apr 09, 2026", title: "把常用工具整理成自己的工作流" },
+  { date: "Mar 21, 2026", title: "阅读、代码和生活记录" },
+  { date: "Feb 12, 2026", title: "静态网站部署到 GitHub Pages" }
+];
+
+const projects = [
+  "Personal Website",
+  "Blog Index",
+  "Notes Archive"
+];
+
+const socials = [
 ];
 ---
 
@@ -11,28 +26,132 @@ const links = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="A minimal personal website built with Astro." />
+    <meta name="description" content="Shanyong Wang 的个人网站和笔记首页。" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Personal Site</title>
+    <title>Shanyong's Notes</title>
   </head>
   <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Homepage">Watson's Notes</a>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">
+        Menu
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
+        {
+          navItems.map((item) => (
+            <a href={`#${item.toLowerCase()}`}>{item}</a>
+          ))
+        }
+      </nav>
+      <button class="theme-button" type="button" aria-label="Toggle theme">Toggle Theme</button>
+    </header>
+
     <main class="page-shell">
-      <section class="intro" aria-labelledby="site-title">
-        <p class="eyebrow">Personal Website</p>
-        <h1 id="site-title">你好，我是 Shanyong Wang。</h1>
-        <p class="summary">
-          这里是一个简洁的个人主页，可以放个人介绍、项目入口和联系方式。
-        </p>
-        <nav class="links" aria-label="Profile links">
+      <section class="profile" id="about" aria-labelledby="profile-title">
+        <div class="avatar-stack" aria-hidden="true">
+          <div class="cover-visual"></div>
+          <div class="avatar">SW</div>
+        </div>
+        <div>
+          <p class="eyebrow">Shanghai / Texas</p>
+          <h1 id="profile-title">Watson</h1>
+          <p class="handle">@watsonnn.life</p>
+          <p class="summary">
+            写代码、整理笔记，也记录一些关于产品、设计和日常工具的想法。
+            这个站点会保持轻量，重点放在内容和长期维护。
+          </p>
+          <a class="about-link" href="#education">About me</a>
+        </div>
+      </section>
+
+      <p class="quote">Never stop building small things.</p>
+
+      <section class="content-section" id="blog" aria-labelledby="posts-title">
+        <div class="section-heading">
+          <h2 id="posts-title">Posts</h2>
+          <a href="#blog">More posts</a>
+        </div>
+        <ol class="post-list">
           {
-            links.map((link) => (
-              <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined}>
-                {link.label}
-              </a>
+            posts.map((post) => (
+              <li>
+                <a href="#blog">
+                  <time>{post.date}</time>
+                  <span>{post.title}</span>
+                </a>
+              </li>
             ))
           }
-        </nav>
+        </ol>
+      </section>
+
+      <section class="content-section" id="projects" aria-labelledby="projects-title">
+        <div class="section-heading">
+          <h2 id="projects-title">Projects</h2>
+        </div>
+        <ul class="project-list">
+          {
+            projects.map((project) => (
+              <li>
+                <a href="#projects">{project}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="content-section" id="education" aria-labelledby="education-title">
+        <div class="section-heading">
+          <h2 id="education-title">Education</h2>
+        </div>
+        <div class="education-item">
+          <h3>Professor "G" Codex / ChatGPT</h3>
+          <p>Openai</p>
+          <time>2024 - Present</time>
+        </div>
+        <div class="education-item">
+          <h3>Professor "CC" Claude</h3>
+          <p>Anthropic</p>
+          <time>2025 - Present</time>
+        </div>
       </section>
     </main>
+
+    <footer class="site-footer">
+      <p>© 2026</p>
+      <div class="footer-links">
+        {
+          socials.map((link) => (
+            <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined}>
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
+    </footer>
+
+    <script>
+      const root = document.documentElement;
+      const themeButton = document.querySelector(".theme-button");
+      const menuButton = document.querySelector(".menu-button");
+      const nav = document.querySelector(".site-nav");
+      const savedTheme = window.localStorage.getItem("theme");
+
+      if (savedTheme === "dark") {
+        root.dataset.theme = "dark";
+      }
+
+      themeButton?.addEventListener("click", () => {
+        const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
+        root.dataset.theme = nextTheme;
+        window.localStorage.setItem("theme", nextTheme);
+      });
+
+      menuButton?.addEventListener("click", () => {
+        const expanded = menuButton.getAttribute("aria-expanded") === "true";
+        menuButton.setAttribute("aria-expanded", String(!expanded));
+        nav?.toggleAttribute("data-open", !expanded);
+      });
+    </script>
   </body>
 </html>

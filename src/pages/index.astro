@@ -1,0 +1,38 @@
+---
+import "../styles/global.css";
+
+const links = [
+  { label: "GitHub", href: "https://github.com/" },
+  { label: "Email", href: "mailto:hello@example.com" }
+];
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A minimal personal website built with Astro." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Personal Site</title>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="intro" aria-labelledby="site-title">
+        <p class="eyebrow">Personal Website</p>
+        <h1 id="site-title">你好，我是 Shanyong Wang。</h1>
+        <p class="summary">
+          这里是一个简洁的个人主页，可以放个人介绍、项目入口和联系方式。
+        </p>
+        <nav class="links" aria-label="Profile links">
+          {
+            links.map((link) => (
+              <a href={link.href} target={link.href.startsWith("http") ? "_blank" : undefined}>
+                {link.label}
+              </a>
+            ))
+          }
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>

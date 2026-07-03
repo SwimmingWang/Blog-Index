@@ -1,0 +1,84 @@
+---
+import { getCollection, render } from "astro:content";
+import "../../styles/global.css";
+import { getPostStats } from "../../lib/post-stats";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const tocItems = headings.filter((heading) => heading.depth >= 1 && heading.depth <= 3);
+const postStats = getPostStats(post);
+
+const formattedDate = post.data.pubDate.toLocaleDateString("en-US", {
+  month: "short",
+  day: "2-digit",
+  year: "numeric"
+});
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={post.data.description ?? post.data.title} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{post.data.title} - Watson's Notes</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Homepage">Watson's Notes</a>
+      <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
+        <a href="/#blog">Blog</a>
+        <a href="/#projects">Projects</a>
+        <a href="/#about">About</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-button" type="button" aria-label="Toggle theme">Toggle Theme</button>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+      </div>
+    </header>
+
+    <main class="page-shell blog-shell">
+      <article class="blog-article" data-reveal>
+        <a class="back-link" href="/#blog">Back to posts</a>
+        <header class="article-header">
+          <div class="article-meta">
+            <time>{formattedDate}</time>
+            <span>{postStats.label}</span>
+          </div>
+          <h1>{post.data.title}</h1>
+          {post.data.description && <p>{post.data.description}</p>}
+        </header>
+        <div class="article-content">
+          <Content />
+        </div>
+      </article>
+      {
+        tocItems.length > 0 && (
+          <aside class="article-toc" aria-labelledby="toc-title" data-reveal>
+            <h2 id="toc-title">Table of Contents</h2>
+            <ol>
+              {tocItems.map((heading) => (
+                <li class={`toc-depth-${heading.depth}`}>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                </li>
+              ))}
+            </ol>
+          </aside>
+        )
+      }
+    </main>
+
+    <script src="/src/scripts/site-motion.js"></script>
+  </body>
+</html>

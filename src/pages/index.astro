@@ -1,16 +1,22 @@
 ---
 import "../styles/global.css";
+import { getCollection } from "astro:content";
+import { getPostStats } from "../lib/post-stats";
 
-const navItems = ["Blog", "Projects", "Gallery", "About"];
+const navItems = ["Blog", "Projects", "About"];
 
-const posts = [
-  { date: "Jul 01, 2026", title: "重新搭建个人网站：从零开始的 Astro 首页" },
-  { date: "Jun 18, 2026", title: "一些关于长期写笔记的想法" },
-  { date: "May 26, 2026", title: "前端项目里的简单设计系统" },
-  { date: "Apr 09, 2026", title: "把常用工具整理成自己的工作流" },
-  { date: "Mar 21, 2026", title: "阅读、代码和生活记录" },
-  { date: "Feb 12, 2026", title: "静态网站部署到 GitHub Pages" }
-];
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((post) => ({
+    date: post.data.pubDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric"
+    }),
+    href: `/blog/${post.id}/`,
+    stats: getPostStats(post),
+    title: post.data.title
+  }));
 
 const projects = [
   "Personal Website",
@@ -33,9 +39,6 @@ const socials = [
   <body>
     <header class="site-header">
       <a class="brand" href="/" aria-label="Homepage">Watson's Notes</a>
-      <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">
-        Menu
-      </button>
       <nav id="site-nav" class="site-nav" aria-label="Primary navigation">
         {
           navItems.map((item) => (
@@ -43,11 +46,16 @@ const socials = [
           ))
         }
       </nav>
-      <button class="theme-button" type="button" aria-label="Toggle theme">Toggle Theme</button>
+      <div class="header-actions">
+        <button class="theme-button" type="button" aria-label="Toggle theme">Toggle Theme</button>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">
+          Menu
+        </button>
+      </div>
     </header>
 
     <main class="page-shell">
-      <section class="profile" id="about" aria-labelledby="profile-title">
+      <section class="profile" id="about" aria-labelledby="profile-title" data-reveal>
         <div class="avatar-stack" aria-hidden="true">
           <div class="cover-visual"></div>
           <div class="avatar">SW</div>
@@ -64,9 +72,9 @@ const socials = [
         </div>
       </section>
 
-      <p class="quote">Never stop building small things.</p>
+      <p class="quote" data-reveal>Never stop building small things.</p>
 
-      <section class="content-section" id="blog" aria-labelledby="posts-title">
+      <section class="content-section" id="blog" aria-labelledby="posts-title" data-reveal>
         <div class="section-heading">
           <h2 id="posts-title">Posts</h2>
           <a href="#blog">More posts</a>
@@ -75,9 +83,12 @@ const socials = [
           {
             posts.map((post) => (
               <li>
-                <a href="#blog">
+                <a href={post.href}>
                   <time>{post.date}</time>
-                  <span>{post.title}</span>
+                  <span>
+                    <strong>{post.title}</strong>
+                    <small>{post.stats.label}</small>
+                  </span>
                 </a>
               </li>
             ))
@@ -85,7 +96,7 @@ const socials = [
         </ol>
       </section>
 
-      <section class="content-section" id="projects" aria-labelledby="projects-title">
+      <section class="content-section" id="projects" aria-labelledby="projects-title" data-reveal>
         <div class="section-heading">
           <h2 id="projects-title">Projects</h2>
         </div>
@@ -100,7 +111,7 @@ const socials = [
         </ul>
       </section>
 
-      <section class="content-section" id="education" aria-labelledby="education-title">
+      <section class="content-section" id="education" aria-labelledby="education-title" data-reveal>
         <div class="section-heading">
           <h2 id="education-title">Education</h2>
         </div>
@@ -130,28 +141,6 @@ const socials = [
       </div>
     </footer>
 
-    <script>
-      const root = document.documentElement;
-      const themeButton = document.querySelector(".theme-button");
-      const menuButton = document.querySelector(".menu-button");
-      const nav = document.querySelector(".site-nav");
-      const savedTheme = window.localStorage.getItem("theme");
-
-      if (savedTheme === "dark") {
-        root.dataset.theme = "dark";
-      }
-
-      themeButton?.addEventListener("click", () => {
-        const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
-        root.dataset.theme = nextTheme;
-        window.localStorage.setItem("theme", nextTheme);
-      });
-
-      menuButton?.addEventListener("click", () => {
-        const expanded = menuButton.getAttribute("aria-expanded") === "true";
-        menuButton.setAttribute("aria-expanded", String(!expanded));
-        nav?.toggleAttribute("data-open", !expanded);
-      });
-    </script>
+    <script src="/src/scripts/site-motion.js"></script>
   </body>
 </html>
